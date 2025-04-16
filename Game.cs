@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,13 +32,17 @@ namespace SpartaDungeon
         public Game()
         {
             ItemDatabase.LoadItems();
+            Init();
+        }
+
+        private void Init()
+        {
             inventory = new Inventory(8);
             player = new Player("Chaemin", CharacterClass.Warrior, inventory);
             shop = new Shop(player);
             dungeon = new Dungeon();
             isGameOver = false;
         }
-
 
         public void GameStart()
         {
@@ -140,8 +145,8 @@ namespace SpartaDungeon
                 Console.WriteLine("<던전 입장>");
                 Console.WriteLine("도전할 던전의 난이도를 선택하세요.");
                 Console.WriteLine($"\n1. 쉬운 던전     | 방어력 {dungeon.DefenseLevel[0]} 이상 권장");
-                Console.WriteLine($"2. 쉬운 던전     | 방어력 {dungeon.DefenseLevel[1]} 이상 권장");
-                Console.WriteLine($"3. 어려운 던전    | 방어력 {dungeon.DefenseLevel[2]} 이상 권장");
+                Console.WriteLine($"2. 보통 던전     | 방어력 {dungeon.DefenseLevel[1]} 이상 권장");
+                Console.WriteLine($"3. 어려운 던전   | 방어력 {dungeon.DefenseLevel[2]} 이상 권장");
                 Console.WriteLine("0. 나가기");
 
                 switch (GetPlayerInput())
@@ -230,8 +235,36 @@ namespace SpartaDungeon
             if (player.CurrentHP <= 0)
             {
                 isGameOver = true;
+                GameOver();
             }
         }
+
+        void GameOver()
+        {
+            bool exit = false;
+            while (!exit)
+            {
+                Console.Clear();
+                Console.WriteLine("You Died");
+                Console.WriteLine("\n1. 다시 시작하기");
+                Console.WriteLine("\n2. 게임 종료");
+                switch (GetPlayerInput())
+                {
+                    case 1:
+                        Init();
+                        exit = true;
+                        break;
+                    case 2:
+                        exit = true;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+
+        }
+
         public int GetPlayerInput()  //플레이어의 입력을 숫자로 반환
         {
             Console.WriteLine("\n원하시는 행동을 입력해주세요.");
@@ -250,6 +283,7 @@ namespace SpartaDungeon
             }
             return selectedIndex; //-1이 반환될 경우, 잘못된 입력
         }
+
 
         public void Pause()
         {

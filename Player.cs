@@ -73,19 +73,22 @@ namespace SpartaDungeon
             BonusDefense = 0;
             foreach (Equipment item in inventory.equippedItems)
             {
-                switch (item.StatType)
+                if (item != null)
                 {
-                    case StatType.Health:
-                        BonusFullHP += item.Stat;
-                        break;
-                    case StatType.Attack:
-                        BonusAttack += item.Stat;
-                        break;
-                    case StatType.Defense:
-                        BonusDefense += item.Stat;
-                        break;
-                    default:
-                        break;
+                    switch (item.StatType)
+                    {
+                        case StatType.Health:
+                            BonusFullHP += item.Stat;
+                            break;
+                        case StatType.Attack:
+                            BonusAttack += item.Stat;
+                            break;
+                        case StatType.Defense:
+                            BonusDefense += item.Stat;
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }

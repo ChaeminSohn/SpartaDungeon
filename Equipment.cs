@@ -8,8 +8,8 @@ namespace SpartaDungeon
 {
     enum EquipmentType
     {
-        Armor,
-        Weapon
+        Weapon = 0,
+        Armor = 1
     }
     internal class Equipment : ITradable  //장비 아이템을 구현하는 클래스
     {
@@ -23,11 +23,11 @@ namespace SpartaDungeon
         public int Stat => itemData.Stat ?? 0;  //장비 스탯 계수
         public bool isEquipped { get; private set; } //플레이어 착용 여부
         public EquipmentType EquipmentType => itemData.EquipmentType ?? default; //장비 종류
-       
- 
+
+
         public Equipment(ItemData itemData)
         {
-             this.itemData = itemData;
+            this.itemData = itemData;
         }
 
         public void ShowInfo()
