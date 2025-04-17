@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace SpartaDungeon
 {
-    enum ItemType
+    public enum ItemType
     {
         Equipment,  //장비 아이템
-        Accessory,  //장신구 아이템
         Usable,     //소비 아이템
+        Other //기타 아이템
     }
     internal interface ITradable //거래 가능한 아이템 구현 시 사용
     {
@@ -18,7 +18,8 @@ namespace SpartaDungeon
         String Description { get; }
         int Price { get; }
         ItemType ItemType { get; }
-
+        bool IsForSale { get; }
         public void ShowInfo();
+        public void OnTrade();
     }
 }

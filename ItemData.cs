@@ -16,16 +16,16 @@ namespace SpartaDungeon
         public ItemType ItemType { get; set; }
 
         //장비 전용 필드
-        public EquipmentType? EquipmentType { get; set; }
-        public StatType? StatType { get; set; }
-        public int? Stat { get; set; }
+        public EquipType? EquipType { get; set; }
+        public Stat? Stat { get; set; }
+        public int? StatValue { get; set; }
 
-        public ItemData(string name, ItemType itemType, EquipmentType equipmentType, StatType statType, int stat, string description, int price)
+        public ItemData(string name, ItemType itemType, EquipType equipType, Stat stat, int statValue, string description, int price)
         {
             Name = name;
-            EquipmentType = equipmentType;
-            StatType = statType;
+            EquipType = equipType;
             Stat = stat;
+            StatValue = statValue;
             Description = description;
             Price = price;
             ItemType = itemType;

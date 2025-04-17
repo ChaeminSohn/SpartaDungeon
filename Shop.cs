@@ -9,23 +9,18 @@ namespace SpartaDungeon
 {
     internal class Shop
     {
-        List<ITradable> sellingItems;
+        List<ITradable> sellingItems;       //모든 판매 아이템 목록
+        ItemType[] itemTypes = (ItemType[])Enum.GetValues(typeof(ItemType));    //모든 아이템 타입을 담는 배열
         Player player;
-        public Shop(Player player)
+        public Shop(Player player, ItemConfig itemConfig)
         {
             this.player = player;
             sellingItems = new List<ITradable>();
 
-            foreach (ItemData itemData in ItemDatabase.Items)
+            foreach (ItemData itemData in itemConfig.Equipments)
             {
                 sellingItems.Add(new Equipment(itemData));
             }
-            // sellingItems.Add(new Equipment(ItemDatabase.BeninnerArmor));
-            // sellingItems.Add(new Equipment(ItemDatabase.SteelArmor));
-            // sellingItems.Add(new Equipment(ItemDatabase.SpartanArmor));
-            // sellingItems.Add(new Equipment(ItemDatabase.RustySword));
-            // sellingItems.Add(new Equipment(ItemDatabase.BronzeAxe));
-            // sellingItems.Add(new Equipment(ItemDatabase.SpartanSpear));
         }
 
         public void ShowShop()
@@ -51,10 +46,9 @@ namespace SpartaDungeon
                 Console.WriteLine("2. 아이템 판매");
                 Console.WriteLine("0. 나가기");
 
-                switch (Game.Instance.GetPlayerInput())
+                switch (Utils.GetPlayerInput(true))
                 {
                     case 0:
-                        Game.Instance.Pause();
                         exit = true;
                         break;
                     case 1:
@@ -65,7 +59,7 @@ namespace SpartaDungeon
                         break;
                     default:
                         Console.WriteLine("잘못된 입력입니다.");
-                        Game.Instance.Pause();
+                        Utils.Pause(false);
                         break;
                 }
             }
@@ -92,12 +86,12 @@ namespace SpartaDungeon
                     item.ShowInfo();
                 }
                 Console.WriteLine("\n0. 나가기");
-                int playerInput = Game.Instance.GetPlayerInput();
+                int playerInput = Utils.GetPlayerInput(true);
 
                 if (playerInput > sellingItems.Count || playerInput == -1)
                 {   //인풋이 아이템 개수보다 크거나 완전 잘못된 값일 때
                     Console.WriteLine("잘못된 입력입니다.");
-                    Game.Instance.Pause();
+                    Utils.Pause(false);
                     continue;
                 }
 
@@ -108,26 +102,31 @@ namespace SpartaDungeon
                 }
                 else
                 {
+                    ITradable selectedItem = sellingItems[playerInput - 1];   //선택된 아이템
+                    if (!selectedItem.IsForSale)  //이미 판매된 아이템인 경우
+                    {
+                        Console.WriteLine("\n이미 판매된 아이템입니다.");
+                        Utils.Pause(false);
+                    }
                     //돈이 충분한 경우
-                    if (player.Gold >= sellingItems[playerInput - 1].Price)
+                    else if (player.Gold >= selectedItem.Price)
                     {
                         //구매 확정 단계
-                        Console.WriteLine($"\n아이템 가격 : {sellingItems[playerInput - 1].Price} G , 보유 골드 : {player.Gold} G");
+                        Console.WriteLine($"\n아이템 가격 : {selectedItem.Price} G , 보유 골드 : {player.Gold} G");
                         Console.WriteLine("1. 구매");
                         Console.WriteLine("2. 다시 생각해본다");
-                        switch (Game.Instance.GetPlayerInput())
+                        switch (Utils.GetPlayerInput(true))
                         {
                             case 1:
-                                player.BuyItem(sellingItems[playerInput - 1]);
-                                sellingItems.RemoveAt(playerInput - 1);
+                                player.BuyItem(selectedItem);
                                 Console.WriteLine("\n구매 감사합니다!");
-                                Game.Instance.Pause();
+                                Utils.Pause(true);
                                 break;
                             case 2:
                                 break;
                             default: //잘못된 입력
                                 Console.WriteLine("잘못된 입력입니다.");
-                                Game.Instance.Pause();
+                                Utils.Pause(false);
                                 break;
 
                         }
@@ -136,7 +135,7 @@ namespace SpartaDungeon
                     else
                     {
                         Console.WriteLine("\n골드가 부족합니다.");
-                        Game.Instance.Pause();
+                        Utils.Pause(false);
                     }
 
                 }
@@ -157,7 +156,7 @@ namespace SpartaDungeon
 
                 Console.WriteLine("\n[아이템 목록]");
                 //플레이어가 보유중인 아이템 목록
-                List<ITradable> items = player.inventory.items;
+                List<ITradable> items = player.Inventory.items;
                 //아이템 목록 보여줌
                 int index = 1;
                 foreach (ITradable item in items)
@@ -166,12 +165,12 @@ namespace SpartaDungeon
                     item.ShowInfo();
                 }
                 Console.WriteLine("\n0. 나가기");
-                int playerInput = Game.Instance.GetPlayerInput();
+                int playerInput = Utils.GetPlayerInput(true);
 
                 if (playerInput > items.Count || playerInput == -1)
                 {   //인풋이 아이템 개수보다 크거나 완전 잘못된 값일 때
                     Console.WriteLine("잘못된 입력입니다.");
-                    Game.Instance.Pause();
+                    Utils.Pause(false);
                     continue;
                 }
                 else if (playerInput == 0) //인풋 0 : 나가기
@@ -180,25 +179,25 @@ namespace SpartaDungeon
                 }
                 else
                 {
+                    ITradable selectedItem = items[playerInput - 1];
                     //판매 시 80% 절감
-                    int sellPrice = (int)(items[playerInput - 1].Price * 0.8);
+                    int sellPrice = (int)(selectedItem.Price * 0.8);
                     //판매 확정 단계
-                    Console.WriteLine($"\n{items[playerInput - 1].Name} : {sellPrice} G");
+                    Console.WriteLine($"\n{selectedItem.Name} : {sellPrice} G");
                     Console.WriteLine("1. 판매");
                     Console.WriteLine("2. 다시 생각해본다");
-                    switch (Game.Instance.GetPlayerInput())
+                    switch (Utils.GetPlayerInput(true))
                     {
                         case 1:
-                            sellingItems.Add(items[playerInput - 1]);
-                            player.SellItem(playerInput - 1, sellPrice);
+                            player.SellItem(selectedItem, sellPrice);
                             Console.WriteLine("\n판매 감사합니다!");
-                            Game.Instance.Pause();
+                            Utils.Pause(true);
                             break;
                         case 2:
                             break;
                         default: //잘못된 입력
                             Console.WriteLine("잘못된 입력입니다.");
-                            Game.Instance.Pause();
+                            Utils.Pause(false);
                             break;
 
                     }

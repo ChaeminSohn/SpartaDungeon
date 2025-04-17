@@ -13,8 +13,7 @@ namespace SpartaDungeon
         public List<ITradable> items { get; private set; } //보유중인 아이템
         public List<Equipment> equipments { get; private set; } //장비 아이템
         public Equipment[] equippedItems { get; private set; } //플레이어가 장비중인 아이템
-
-        public event Action? OnEquipChanged;
+        public event Action? OnEquipChanged;    //플레이어 장비 변환 이벤트
         public Inventory(int space)
         {
             inventorySpace = space;
@@ -25,8 +24,12 @@ namespace SpartaDungeon
             {
                 switch (item.ItemType)
                 {
-                    case ItemType.Equipment:  //장비 아이템인 경우
-                        equipments.Add((Equipment)item);    //장비 아이템 리스트에 할당
+                    case ItemType.Equipment:  //장비 아이템
+                        equipments.Add((Equipment)item);
+                        break;
+                    case ItemType.Usable:  //소비 아이템   
+                        break;
+                    case ItemType.Other:  //기타 아이템  
                         break;
                     default:
                         break;
@@ -40,7 +43,21 @@ namespace SpartaDungeon
             switch (item.ItemType)   //아이템 분류 과정
             {
                 case ItemType.Equipment:
+
                     equipments.Add((Equipment)item);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public void RemoveItem(ITradable item)
+        {
+            items.Remove(item);
+            switch (item.ItemType)   //아이템 분류 과정
+            {
+                case ItemType.Equipment:
+                    equipments.Remove((Equipment)item);
                     break;
                 default:
                     break;
@@ -48,31 +65,35 @@ namespace SpartaDungeon
         }
         public void ShowItems()
         {
-            Console.Clear();
-            Console.WriteLine("<인벤토리>");
-            Console.WriteLine("보유 중인 아이템을 관리할 수 있습니다.");
-            Console.WriteLine("\n[아이템 목록]");
-            foreach (ITradable item in items)
+            bool exit = false;
+            while (!exit)
             {
-                Console.Write("- ");
-                item.ShowInfo();
-            }
-            Console.WriteLine("\n1. 장착 관리");
-            Console.WriteLine("0. 나가기");
+                Console.Clear();
+                Console.WriteLine("<인벤토리>");
+                Console.WriteLine("보유 중인 아이템을 관리할 수 있습니다.");
+                Console.WriteLine("\n[아이템 목록]");
+                foreach (ITradable item in items)
+                {
+                    Console.Write("- ");
+                    item.ShowInfo();
+                }
+                Console.WriteLine("\n1. 장착 관리");
+                Console.WriteLine("0. 나가기");
 
 
-            switch (Game.Instance.GetPlayerInput())
-            {
-                case 1:
-                    ControlEquipments();
-                    break;
-                case 0:
-                    break;
-                default:
-                    Console.WriteLine("잘못된 입력입니다.");
-                    Game.Instance.Pause();
-                    ShowItems();
-                    break;
+                switch (Utils.GetPlayerInput(true))
+                {
+                    case 1:
+                        ControlEquipments();
+                        break;
+                    case 0:
+                        exit = true;
+                        break;
+                    default:
+                        Console.WriteLine("잘못된 입력입니다.");
+                        Utils.Pause(false);
+                        break;
+                }
             }
         }
 
@@ -101,9 +122,9 @@ namespace SpartaDungeon
                 }
 
                 Console.WriteLine("\n0. 나가기");
-                Console.Write("장착/해제할 아이템 번호를 입력하세요. ");
+                Console.Write("\n장착/해제할 아이템 번호를 입력하세요. ");
 
-                int playerInput = Game.Instance.GetPlayerInput();
+                int playerInput = Utils.GetPlayerInput(false);
 
                 if (playerInput == 0) //인풋 0 : 나가기
                 {
@@ -112,12 +133,12 @@ namespace SpartaDungeon
                 else if (playerInput > equipments.Count || playerInput == -1)
                 {   //인풋이 아이템 개수보다 크거나 완전 잘못된 값일 때
                     Console.WriteLine("\n잘못된 입력입니다.");
-                    Game.Instance.Pause();
+                    Utils.Pause(false);
                 }
                 else
                 {
                     Equipment selected = equipments[playerInput - 1];
-                    int equipIndex = (int)selected.EquipmentType;
+                    int equipIndex = (int)selected.EquipType;
 
                     if (selected.isEquipped)    //이미 장착된 경우
                     {
