@@ -74,7 +74,7 @@ namespace SpartaDungeon
                 foreach (ITradable item in items)
                 {
                     Console.Write("- ");
-                    item.ShowInfo();
+                    item.ShowInfoInventory();
                 }
                 Console.WriteLine("\n1. 장착 관리");
                 Console.WriteLine("0. 나가기");
@@ -111,12 +111,12 @@ namespace SpartaDungeon
                     if (equipments[i].isEquipped)
                     {
                         Console.Write($"- {i + 1} [E]");
-                        equipments[i].ShowInfo();
+                        equipments[i].ShowInfoInventory();
                     }
                     else
                     {
                         Console.Write($"- {i + 1}   ");
-                        equipments[i].ShowInfo();
+                        equipments[i].ShowInfoInventory();
                     }
                 }
 

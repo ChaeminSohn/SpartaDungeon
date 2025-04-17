@@ -19,7 +19,8 @@ namespace SpartaDungeon
         int Price { get; }
         ItemType ItemType { get; }
         bool IsForSale { get; }
-        public void ShowInfo();
+        public void ShowInfoShop();
+        public void ShowInfoInventory();
         public void OnTrade();
         public ItemInfo GetItemInfo();
     }

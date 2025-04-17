@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -10,7 +11,6 @@ namespace SpartaDungeon
 {
     internal class Game
     {
-        ItemConfig itemConfig;
         Inventory inventory;
         Player player;
         Shop shop;
@@ -20,14 +20,14 @@ namespace SpartaDungeon
         bool isGameOver;
         string savePath = "saveData.json"; //저장 파일 경로
 
-        void NewGameSetting()
+        void NewGameSetting()   //새로운 게임 설정
         {
+            //장비 아이템 불러오기
             if (!ConfigLoader.TryLoad<ItemConfig>("items_config.json", out var config))
             {
                 Console.WriteLine("장비 데이터를 불러오지 못했습니다.");
                 Utils.Pause(false);
             }
-            itemConfig = config;
             foreach (ItemInfo info in config.Items)    //아이템 정보를 통해 객체화 실행
             {
                 ITradable instance;
@@ -106,6 +106,7 @@ namespace SpartaDungeon
                         exit = true;
                         break;
                     default:
+
                         break;
                 }
             }
@@ -139,7 +140,6 @@ namespace SpartaDungeon
             {
                 TownAction();
             }
-            GameOver();
         }
 
         void SaveData()     //게임 저장
@@ -208,32 +208,32 @@ namespace SpartaDungeon
             Console.WriteLine("2. 인벤토리");
             Console.WriteLine("3. 상점");
             Console.WriteLine("4. 던전 입장");
-            Console.WriteLine("5. 휴식하기\n");
+            Console.WriteLine("5. 휴식하기");
+            Console.WriteLine("6. 게임 종료\n");
 
 
             switch (Utils.GetPlayerInput(true))
             {
-                case 1:
+                case 1:     //상태창 표시
                     player.ShowPlayerInfo();
                     Utils.Pause(true);
                     Console.Clear();
                     break;
-                case 2:
+                case 2:     //인벤토리 열기
                     inventory.ShowItems();
                     Console.Clear();
                     break;
-                case 3:
+                case 3:     //상점 열기
                     shop.ShowShop();
                     break;
-                case 4:
+                case 4:     //던전 입장
                     DungeonAction();
                     break;
-                case 5:
+                case 5:     //휴식하기
                     RestAction();
                     break;
-                case 6:
-                    SaveData();
-                    isGameOver = true;
+                case 6:     //게임 종료하기
+                    ExitGame();
                     break;
                 default:
                     Console.WriteLine("잘못된 입력입니다.");
@@ -242,47 +242,7 @@ namespace SpartaDungeon
             }
         }
 
-        void RestAction()
-        {
-            bool exit = false;
-            while (!exit)
-            {
-                int health = player.CurrentHP;
-                Console.Clear();
-                Console.WriteLine("<휴식하기>");
-                Console.WriteLine($"500 G 를 내면 체력을 회복할 수 있습니다." +
-                    $" (보유 골드 : {player.Gold} G)");
-                Console.WriteLine("\n1. 휴식하기");
-                Console.WriteLine("0. 나가기");
-
-                switch (Utils.GetPlayerInput(true))
-                {
-                    case 0:
-                        exit = true;
-                        break;
-                    case 1:
-                        if (player.Gold >= 500)
-                        {
-                            player.RecoverHP(player.FullHP);
-                            player.ChangeGold(-500);
-                            Console.WriteLine("\n푹 쉬었습니다.");
-                            Console.WriteLine($"체력 {health} -> {player.CurrentHP}");
-                            Utils.Pause(true);
-                        }
-                        else
-                        {
-                            Console.WriteLine("\n골드가 부족합니다.");
-                            Utils.Pause(false);
-                        }
-                        exit = true;
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-
-        void DungeonAction()
+        void DungeonAction()    // 4: 던전 입장 액션
         {
             bool exit = false;
             while (!exit)
@@ -390,7 +350,76 @@ namespace SpartaDungeon
             }
         }
 
-        void GameOver()
+        void RestAction()   //5: 휴식 액션
+        {
+            bool exit = false;
+            while (!exit)
+            {
+                int health = player.CurrentHP;
+                Console.Clear();
+                Console.WriteLine("<휴식하기>");
+                Console.WriteLine($"500 G 를 내면 체력을 회복할 수 있습니다." +
+                    $" (보유 골드 : {player.Gold} G)");
+                Console.WriteLine("\n1. 휴식하기");
+                Console.WriteLine("0. 나가기");
+
+                switch (Utils.GetPlayerInput(true))
+                {
+                    case 0:
+                        exit = true;
+                        break;
+                    case 1:
+                        if (player.Gold >= 500)
+                        {
+                            player.RecoverHP(player.FullHP);
+                            player.ChangeGold(-500);
+                            Console.WriteLine("\n푹 쉬었습니다.");
+                            Console.WriteLine($"체력 {health} -> {player.CurrentHP}");
+                            Utils.Pause(true);
+                        }
+                        else
+                        {
+                            Console.WriteLine("\n골드가 부족합니다.");
+                            Utils.Pause(false);
+                        }
+                        exit = true;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        void ExitGame()     // 6: 게임 종료 액션
+        {
+            bool exit = false;
+            while (!exit)
+            {
+                Console.Clear();
+                Console.WriteLine("게임을 종료하시겠습니까?");
+                Console.WriteLine("진행상황은 자동으로 저장됩니다.");
+                Console.WriteLine("\n1. 계속하기");
+                Console.WriteLine("2. 게임 종료");
+
+                switch (Utils.GetPlayerInput(true))
+                {
+                    case 1:
+                        exit = true;
+                        break;
+                    case 2:
+                        Console.WriteLine("\n게임을 종료합니다.");
+                        SaveData();
+                        isGameOver = true;
+                        exit = true;
+                        break;
+                    default:
+                        Console.WriteLine("잘못된 입력입니다.");
+                        Utils.Pause(false);
+                        break;
+                }
+            }
+        }
+        void GameOver()     //플레이어 사망 시 호출
         {
             bool exit = false;
             while (!exit)
@@ -416,30 +445,5 @@ namespace SpartaDungeon
 
         }
 
-        // public int GetPlayerInput()  //플레이어의 입력을 숫자로 반환
-        // {
-        //     Console.WriteLine("\n원하시는 행동을 입력해주세요.");
-        //     Console.Write(">>");
-        //     playerInput = Console.ReadKey();
-        //     int selectedIndex = -1;
-
-        //     //0~9 숫자가 입력된 경우
-        //     if (playerInput.Key >= ConsoleKey.D0 && playerInput.Key <= ConsoleKey.D9)
-        //     {
-        //         selectedIndex = (int)playerInput.Key - (int)ConsoleKey.D0;
-        //     }
-        //     else if (playerInput.Key >= ConsoleKey.NumPad0 && playerInput.Key <= ConsoleKey.NumPad9)
-        //     {
-        //         selectedIndex = (int)playerInput.Key - (int)ConsoleKey.NumPad0;
-        //     }
-        //     return selectedIndex; //-1이 반환될 경우, 잘못된 입력
-        // }
-
-
-        // public void Pause()
-        // {
-        //     Console.WriteLine("\n아무 키나 누르면 계속합니다...");
-        //     Console.ReadKey();
-        // }
     }
 }

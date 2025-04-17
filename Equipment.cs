@@ -45,7 +45,7 @@ namespace SpartaDungeon
                 IsForSale = true;
             }
         }
-        public void ShowInfo()
+        public void ShowInfoShop()  //정보 표시 - 상점
         {
             string typeFormatted = Utils.PadToWidth(Utils.EquipTypeDisplayNames[EquipType], 6);
             string nameFormatted = Utils.PadToWidth(Name, 15);
@@ -62,6 +62,16 @@ namespace SpartaDungeon
             }
 
             Console.WriteLine($"{typeFormatted} | {nameFormatted} | {statFormatted} | {descFormatted} | {priceFormatted}");
+        }
+        public void ShowInfoInventory()     //정보 표시 - 인벤토리
+        {
+            string typeFormatted = Utils.PadToWidth(Utils.EquipTypeDisplayNames[EquipType], 6);
+            string nameFormatted = Utils.PadToWidth(Name, 15);
+            string statFormatted = Utils.PadToWidth($"{Utils.StatDisplayNames[Stat]} +{StatValue}", 15);
+            string descFormatted = Utils.PadToWidth(Description, 50);
+
+
+            Console.WriteLine($"{typeFormatted} | {nameFormatted} | {statFormatted} | {descFormatted}");
         }
 
         public ItemInfo GetItemInfo()

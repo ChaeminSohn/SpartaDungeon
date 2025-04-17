@@ -39,7 +39,7 @@ namespace SpartaDungeon
                 foreach (ITradable item in sellingItems)
                 {
                     Console.Write("- ");
-                    item.ShowInfo();
+                    item.ShowInfoShop();
                 }
                 //플레이어 입력 받기
                 Console.WriteLine("\n1. 아이템 구매");
@@ -83,7 +83,7 @@ namespace SpartaDungeon
                 foreach (ITradable item in sellingItems)
                 {
                     Console.Write($"- {index++}. ");
-                    item.ShowInfo();
+                    item.ShowInfoShop();
                 }
                 Console.WriteLine("\n0. 나가기");
                 int playerInput = Utils.GetPlayerInput(true);
@@ -162,7 +162,7 @@ namespace SpartaDungeon
                 foreach (ITradable item in items)
                 {
                     Console.Write($"- {index++}. ");
-                    item.ShowInfo();
+                    item.ShowInfoShop();
                 }
                 Console.WriteLine("\n0. 나가기");
                 int playerInput = Utils.GetPlayerInput(true);

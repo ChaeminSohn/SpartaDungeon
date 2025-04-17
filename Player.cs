@@ -41,7 +41,7 @@ namespace SpartaDungeon
             Level = 1;
             Experience = 0;
             this.Inventory = inventory;
-            LoadPlayerData();
+            LoadDefaultData();
             inventory.OnEquipChanged += UpdatePlayerStats;
         }
 
@@ -60,7 +60,7 @@ namespace SpartaDungeon
             Gold = playerData.Gold;
         }
 
-        public void LoadPlayerData()
+        public void LoadDefaultData()
         {
             //플레이어 기본 데이터 파일 읽어오기
             if (!ConfigLoader.TryLoad<PlayerConfig>("player_config.json", out var config))
@@ -68,29 +68,29 @@ namespace SpartaDungeon
                 Console.WriteLine("플레이어 설정을 불러오지 못했습니다.");
                 return;
             }
-            PlayerData baseData;
+            PlayerData defaultData;
             switch (Job)
             {
-                case Job.Warrior:
-                    baseData = config.BaseWarriorData;
+                case Job.Warrior:   //전사
+                    defaultData = config.BaseWarriorData;
                     break;
-                case Job.Mage:
-                    baseData = config.BaseMageData;
+                case Job.Mage:      //마법사
+                    defaultData = config.BaseMageData;
                     break;
-                case Job.Archer:
-                    baseData = config.BaseArcherData;
+                case Job.Archer:    //궁수
+                    defaultData = config.BaseArcherData;
                     break;
                 default:
-                    baseData = config.BaseWarriorData;
+                    defaultData = config.BaseWarriorData;
                     break;
             }
-            MaxLevel = baseData.MaxLevel;
-            ExpThresholds = baseData.ExpThresholds;
-            BaseFullHP = baseData.BaseFullHP;
+            MaxLevel = defaultData.MaxLevel;
+            ExpThresholds = defaultData.ExpThresholds;
+            BaseFullHP = defaultData.BaseFullHP;
             CurrentHP = BaseFullHP;
-            BaseAttack = baseData.BaseAttack;
-            BaseDefense = baseData.BaseDefense;
-            Gold = baseData.Gold;
+            BaseAttack = defaultData.BaseAttack;
+            BaseDefense = defaultData.BaseDefense;
+            Gold = defaultData.Gold;
 
         }
 
@@ -212,7 +212,7 @@ namespace SpartaDungeon
             Console.WriteLine($"Gold : {Gold} G");
         }
 
-        public PlayerData GetPlayerData()
+        public PlayerData GetPlayerData()   //플레이어 데이터 추출
         {
             return new PlayerData(Name, Job, Level, MaxLevel, Experience, ExpThresholds, BaseFullHP, CurrentHP,
                 BaseAttack, BaseDefense, Gold);
