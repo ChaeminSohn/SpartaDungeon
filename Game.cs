@@ -15,20 +15,39 @@ namespace SpartaDungeon
         Player player;
         Shop shop;
         Dungeon dungeon;
+        List<ITradable> itemList = new List<ITradable>();   //모든 아이템의 객체를 담는 리스트
+        List<ItemInfo> itemDatas = new List<ItemInfo>();  //모든 아이템의 정보를 담는 리스트
         bool isGameOver;
-
         string savePath = "saveData.json"; //저장 파일 경로
-        public Game()
-        {
-            if (!ConfigLoader.TryLoad<ItemConfig>("equipments_config.json", out var config))
-            {
-                Console.WriteLine("장비 데이터를 불러오지 못했습니다.");
-            }
-            itemConfig = config;
-        }
 
         void NewGameSetting()
         {
+            if (!ConfigLoader.TryLoad<ItemConfig>("items_config.json", out var config))
+            {
+                Console.WriteLine("장비 데이터를 불러오지 못했습니다.");
+                Utils.Pause(false);
+            }
+            itemConfig = config;
+            foreach (ItemInfo info in config.Items)    //아이템 정보를 통해 객체화 실행
+            {
+                ITradable instance;
+                switch (info.ItemType)
+                {
+                    case ItemType.Equipment:      //장비 아이템
+                        instance = new Equipment(info);
+                        break;
+                    case ItemType.Usable:       //소비 아이템
+                        instance = new Equipment(info);
+                        break;
+                    case ItemType.Other:        //기타 아이템
+                        instance = new Equipment(info);
+                        break;
+                    default:
+                        instance = new Equipment(info);
+                        break;
+                }
+                itemList.Add(instance);
+            }
             bool exit = false;
             string playerName = string.Empty;
             Job playerJob = default;
@@ -91,9 +110,9 @@ namespace SpartaDungeon
                 }
             }
 
-            inventory = new Inventory(8);
+            inventory = new Inventory();
             player = new Player(playerName, playerJob, inventory);
-            shop = new Shop(player, itemConfig);
+            shop = new Shop(player, itemList);
             dungeon = new Dungeon();
             isGameOver = false;
         }
@@ -102,14 +121,18 @@ namespace SpartaDungeon
         {
             if (File.Exists(savePath))  //세이브 파일이 존재할 경우
             {
+                Console.Clear();
                 Console.WriteLine("세이브 파일이 존재합니다. 이어서 게임을 시작합니다.");
                 Utils.Pause(false);
+                LoadData();
             }
             else    //세이브 파일이 존재하지 않을 경우
             {
+                Console.Clear();
                 Console.WriteLine("세이브 파일이 없습니다. 새로운 게임을 시작합니다..");
-                NewGameSetting();
                 Utils.Pause(false);
+                NewGameSetting();
+
             }
 
             while (!isGameOver)
@@ -119,15 +142,61 @@ namespace SpartaDungeon
             GameOver();
         }
 
-        void SaveData()
+        void SaveData()     //게임 저장
         {
-            string json = JsonSerializer.Serialize(player);
+            itemDatas = new List<ItemInfo>();
+            foreach (ITradable item in itemList)
+            {
+                itemDatas.Add(item.GetItemInfo());
+            }
+            GameSaveData gameSaveData = new GameSaveData(player.GetPlayerData(), itemDatas);
+
+            string json = JsonSerializer.Serialize(gameSaveData);
+            File.WriteAllText(savePath, json);
         }
 
 
-        void LoadData()
+        void LoadData()     //게임 불러오기
         {
+            if (!ConfigLoader.TryLoad<GameSaveData>(savePath, out var config))
+            {
+                Console.WriteLine("저장 데이터 불러오기 실패");
+                Utils.Pause(false);
+                return;
+            }
+            inventory = new Inventory();
+            foreach (ItemInfo info in config.ItemData)    //아이템 정보를 통해 객체화 실행
+            {
+                ITradable instance;
+                switch (info.ItemType)
+                {
+                    case ItemType.Equipment:      //장비 아이템
+                        instance = new Equipment(info);
+                        break;
+                    case ItemType.Usable:       //소비 아이템
+                        instance = new Equipment(info);
+                        break;
+                    case ItemType.Other:        //기타 아이템
+                        instance = new Equipment(info);
+                        break;
+                    default:
+                        instance = new Equipment(info);
+                        break;
+                }
 
+                itemList.Add(instance);
+                if (!instance.IsForSale)    //플레이어의 소유인 경우
+                {
+                    inventory.AddItem(instance);    //인벤토리에 추가
+                }
+
+
+            }
+            player = new Player(config.PlayerData, inventory);
+            player.RestoreAfterLoad();
+            shop = new Shop(player, itemList);
+            dungeon = new Dungeon();
+            isGameOver = false;
         }
         public void TownAction()
         {
@@ -161,6 +230,10 @@ namespace SpartaDungeon
                     break;
                 case 5:
                     RestAction();
+                    break;
+                case 6:
+                    SaveData();
+                    isGameOver = true;
                     break;
                 default:
                     Console.WriteLine("잘못된 입력입니다.");

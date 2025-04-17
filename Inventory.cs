@@ -9,14 +9,13 @@ namespace SpartaDungeon
 {
     internal class Inventory
     {
-        int inventorySpace;
+        int inventorySpace = 8;
         public List<ITradable> items { get; private set; } //보유중인 아이템
         public List<Equipment> equipments { get; private set; } //장비 아이템
         public Equipment[] equippedItems { get; private set; } //플레이어가 장비중인 아이템
         public event Action? OnEquipChanged;    //플레이어 장비 변환 이벤트
-        public Inventory(int space)
+        public Inventory()
         {
-            inventorySpace = space;
             items = new List<ITradable>(inventorySpace);
             equipments = new List<Equipment>();
             equippedItems = new Equipment[2];   //0 : 무기 1 :방어구

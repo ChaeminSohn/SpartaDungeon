@@ -2,9 +2,9 @@ namespace SpartaDungeon
 {
     internal class PlayerConfig
     {
-        public BasePlayerData BaseWarriorData { get; set; }
-        public BasePlayerData BaseMageData { get; set; }
-        public BasePlayerData BaseArcherData { get; set; }
+        public PlayerData BaseWarriorData { get; set; }
+        public PlayerData BaseMageData { get; set; }
+        public PlayerData BaseArcherData { get; set; }
 
     }
 }

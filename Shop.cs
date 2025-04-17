@@ -12,14 +12,14 @@ namespace SpartaDungeon
         List<ITradable> sellingItems;       //모든 판매 아이템 목록
         ItemType[] itemTypes = (ItemType[])Enum.GetValues(typeof(ItemType));    //모든 아이템 타입을 담는 배열
         Player player;
-        public Shop(Player player, ItemConfig itemConfig)
+        public Shop(Player player, List<ITradable> items)
         {
             this.player = player;
             sellingItems = new List<ITradable>();
 
-            foreach (ItemData itemData in itemConfig.Equipments)
+            foreach (ITradable item in items)
             {
-                sellingItems.Add(new Equipment(itemData));
+                sellingItems.Add(item);
             }
         }
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SpartaDungeon
 {
-    enum Stat  //스탯 종류
+    public enum Stat  //스탯 종류
     {
         Health,     //체력
         Attack,     //공격력

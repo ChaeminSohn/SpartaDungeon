@@ -21,5 +21,6 @@ namespace SpartaDungeon
         bool IsForSale { get; }
         public void ShowInfo();
         public void OnTrade();
+        public ItemInfo GetItemInfo();
     }
 }

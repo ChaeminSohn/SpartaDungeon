@@ -1,7 +1,7 @@
 {    
     "BaseWarriorData": 
     {
-    "BaseHP" : 100,
+    "BaseFullHP" : 100,
     "BaseAttack" : 10,
     "BaseDefense" : 5,
     "Gold" : 1000,
@@ -10,7 +10,7 @@
     },
     "BaseMageData": 
     {
-    "BaseHP" : 60,
+    "BaseFullHP" : 60,
     "BaseAttack" : 15,
     "BaseDefense" : 3,
     "Gold" : 1000,
@@ -19,7 +19,7 @@
     },
     "BaseArcherData": 
     {
-    "BaseHP" : 80,
+    "BaseFullHP" : 80,
     "BaseAttack" : 12,
     "BaseDefense" : 4,
     "Gold" : 1000,
