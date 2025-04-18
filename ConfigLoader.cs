@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace SpartaDungeon
 {
-    internal static class ConfigLoader
+    internal static class ConfigLoader  //json 파일 읽어오기 전용 클래스
     {
         public static bool TryLoad<T>(string path, out T result)
         {

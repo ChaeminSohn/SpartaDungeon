@@ -13,23 +13,21 @@ namespace SpartaDungeon
     }
     internal class Equipment : ITradable  //장비 아이템을 구현하는 클래스
     {
-        private ItemInfo ItemInfo;
-
-        public string Name => ItemInfo.Name;
-        public string Description => ItemInfo.Description;
-        public int Price => ItemInfo.Price;
-        public ItemType ItemType => ItemInfo.ItemType;
-        public Stat Stat => ItemInfo.Stat ?? default; //스탯 종류(공격력, 방어력, ....)
-        public int StatValue => ItemInfo.StatValue ?? 0;  //장비 스탯 계수
-        public bool isEquipped { get; private set; } //플레이어 착용 여부
+        private ItemInfo itemInfo;
+        public string Name => itemInfo.Name;
+        public string Description => itemInfo.Description;
+        public int Price => itemInfo.Price;
+        public ItemType ItemType => itemInfo.ItemType;
+        public EquipType EquipType => itemInfo.EquipType; //장비 종류
+        public Stat Stat => itemInfo.Stat; //스탯 종류(공격력, 방어력, ....)
+        public int StatValue => itemInfo.StatValue;  //장비 스탯 계수
+        public bool IsEquipped { get; private set; } //플레이어 착용 여부
         public bool IsForSale { get; private set; }   //판매 여부
-        public EquipType EquipType => ItemInfo.EquipType; //장비 종류
-
 
         public Equipment(ItemInfo itemInfo)
         {
-            this.ItemInfo = itemInfo;
-            isEquipped = itemInfo.IsEquipped;
+            this.itemInfo = itemInfo;
+            IsEquipped = itemInfo.IsEquipped;
             IsForSale = itemInfo.IsForSale;
         }
 
@@ -45,47 +43,44 @@ namespace SpartaDungeon
                 IsForSale = true;
             }
         }
-        public void ShowInfoShop()  //정보 표시 - 상점
+
+        public void ShowInfo(bool showPrice)     //정보 표시 - 가격은 보여줄지 말지 선택
         {
             string typeFormatted = Utils.PadToWidth(Utils.EquipTypeDisplayNames[EquipType], 6);
             string nameFormatted = Utils.PadToWidth(Name, 15);
             string statFormatted = Utils.PadToWidth($"{Utils.StatDisplayNames[Stat]} +{StatValue}", 15);
             string descFormatted = Utils.PadToWidth(Description, 50);
-            string priceFormatted;
-            if (IsForSale)
-            {
-                priceFormatted = Utils.PadToWidth($"{Price} G", 8);
+            if (showPrice)
+            {   //가격 표시 - 주로 상점에서 이용
+                string priceFormatted;
+                if (IsForSale)
+                {
+                    priceFormatted = Utils.PadToWidth($"{Price} G", 8);
+                }
+                else
+                {
+                    priceFormatted = Utils.PadToWidth("[판매 완료]", 8);
+                }
+                Console.WriteLine($"{typeFormatted} | {nameFormatted} | {statFormatted} | {descFormatted} | {priceFormatted}");
             }
-            else
+            else    //가격 미표시 
             {
-                priceFormatted = Utils.PadToWidth("[판매 완료]", 8);
+                Console.WriteLine($"{typeFormatted} | {nameFormatted} | {statFormatted} | {descFormatted}");
             }
-
-            Console.WriteLine($"{typeFormatted} | {nameFormatted} | {statFormatted} | {descFormatted} | {priceFormatted}");
-        }
-        public void ShowInfoInventory()     //정보 표시 - 인벤토리
-        {
-            string typeFormatted = Utils.PadToWidth(Utils.EquipTypeDisplayNames[EquipType], 6);
-            string nameFormatted = Utils.PadToWidth(Name, 15);
-            string statFormatted = Utils.PadToWidth($"{Utils.StatDisplayNames[Stat]} +{StatValue}", 15);
-            string descFormatted = Utils.PadToWidth(Description, 50);
-
-
-            Console.WriteLine($"{typeFormatted} | {nameFormatted} | {statFormatted} | {descFormatted}");
         }
 
-        public ItemInfo GetItemInfo()
+        public ItemInfo GetItemInfo()   //아이템 정보 추출
         {
-            return new ItemInfo(Name, ItemType, EquipType, Stat, StatValue, Description, Price, IsForSale, isEquipped);
+            return new ItemInfo(Name, ItemType, EquipType, Stat, StatValue, Description, Price, IsForSale, IsEquipped);
         }
-        public void Equip()
+        public void Equip()     //아이템 장착
         {
-            isEquipped = true;
+            IsEquipped = true;
         }
 
-        public void UnEquip()
+        public void UnEquip()   //아이템 장착 해제
         {
-            isEquipped = false;
+            IsEquipped = false;
         }
     }
 }

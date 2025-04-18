@@ -20,13 +20,11 @@ namespace SpartaDungeon
             return str + new string(' ', padding);
         }
 
-        public static int GetPlayerInput(bool withText)  //플레이어의 입력을 숫자로 반환
+        //플레이어 입력 기능 모음
+        // boolean 값은 텍스트의 표시 여부(false면 입력만 받음)
+        public static int GetPlayerInput()  //플레이어의 입력을 숫자로 반환
         {
-            if (withText)
-            {
-                Console.WriteLine("\n원하시는 행동을 입력해주세요.");
-                Console.Write(">>");
-            }
+            Console.Write("\n>>");
             ConsoleKeyInfo playerInput = Console.ReadKey(true);
             int selectedIndex = -1;
 
@@ -51,6 +49,8 @@ namespace SpartaDungeon
             Console.ReadKey();
         }
 
+
+        // 열거형 출력 전용 딕셔너리 모음
         public static Dictionary<Job, string> JobDisplayNames = new Dictionary<Job, string>
         {
             {Job.Warrior, "전사"},

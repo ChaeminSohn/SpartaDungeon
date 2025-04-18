@@ -20,15 +20,39 @@ namespace SpartaDungeon
         bool isGameOver;
         string savePath = "saveData.json"; //저장 파일 경로
 
+        public void GameStart()     //게임 시작
+        {
+            if (File.Exists(savePath))  //세이브 파일이 존재할 경우
+            {
+                Console.Clear();
+                Console.WriteLine("세이브 파일이 존재합니다. 이어서 게임을 시작합니다.");
+                Utils.Pause(true);
+                LoadData();
+            }
+            else    //세이브 파일이 존재하지 않을 경우
+            {
+                Console.Clear();
+                Console.WriteLine("세이브 파일이 없습니다. 새로운 게임을 시작합니다..");
+                Utils.Pause(true);
+                NewGameSetting();
+
+            }
+            while (!isGameOver)     //게임이 종료될 때 까지 반복
+            {
+                TownAction();
+            }
+            Console.Clear();
+            Console.WriteLine("게임이 종료되었습니다.");
+        }
         void NewGameSetting()   //새로운 게임 설정
         {
-            //장비 아이템 불러오기
+            //아이템 데이터 불러오기
             if (!ConfigLoader.TryLoad<ItemConfig>("items_config.json", out var config))
             {
-                Console.WriteLine("장비 데이터를 불러오지 못했습니다.");
+                Console.WriteLine("아이템 데이터를 불러오지 못했습니다.");
                 Utils.Pause(false);
             }
-            foreach (ItemInfo info in config.Items)    //아이템 정보를 통해 객체화 실행
+            foreach (ItemInfo info in config.Items)    //아이템 정보를 통해 아이템 객체 생성
             {
                 ITradable instance;
                 switch (info.ItemType)
@@ -37,109 +61,27 @@ namespace SpartaDungeon
                         instance = new Equipment(info);
                         break;
                     case ItemType.Usable:       //소비 아이템
-                        instance = new Equipment(info);
+                        instance = new Usable(info);
                         break;
                     case ItemType.Other:        //기타 아이템
-                        instance = new Equipment(info);
+                        instance = new OtherItem(info);
                         break;
                     default:
-                        instance = new Equipment(info);
+                        instance = new OtherItem(info);
                         break;
                 }
                 itemList.Add(instance);
             }
-            bool exit = false;
-            string playerName = string.Empty;
-            Job playerJob = default;
 
-            while (!exit)   //이름 설정
-            {
-                Console.Clear();
-                Console.WriteLine("스파르타 던전에 오신 걸 환영합니다!");
-                Console.WriteLine("플레이어 이름을 입력해주세요.\n");
-                string input = Console.ReadLine();
-
-                // 입력이 null이거나 공백인 경우
-                if (string.IsNullOrWhiteSpace(input))
-                {
-                    Console.WriteLine("이름은 비워둘 수 없습니다. 다시 입력해주세요.");
-                    Utils.Pause(false);
-                    continue;
-                }
-
-                // 너무 짧거나 긴 이름인 경우
-                if (input.Length < 2 || input.Length > 12)
-                {
-                    Console.WriteLine("이름은 2자 이상 12자 이하여야 합니다.");
-                    Utils.Pause(false);
-                    continue;
-                }
-                playerName = input;
-                exit = true;
-            }
-
-            exit = false;
-
-            while (!exit)   //직업 설정
-            {
-                Console.Clear();
-                Console.WriteLine("직업을 선택하세요.\n");
-                foreach (Job job in Enum.GetValues(typeof(Job)))
-                {
-                    Console.WriteLine($"{(int)job + 1}. {job}");
-                }
-
-                Console.WriteLine();
-
-                switch (Utils.GetPlayerInput(false))
-                {
-                    case 1:
-                        playerJob = Job.Warrior;
-                        exit = true;
-                        break;
-                    case 2:
-                        playerJob = Job.Mage;
-                        exit = true;
-                        break;
-                    case 3:
-                        playerJob = Job.Archer;
-                        exit = true;
-                        break;
-                    default:
-
-                        break;
-                }
-            }
+            string playerName = GetNameFromPlayer(); ;
+            Job playerJob = GetJobFromPlayer(); ;
 
             inventory = new Inventory();
             player = new Player(playerName, playerJob, inventory);
+            player.OnPlayerDie += GameOver;
             shop = new Shop(player, itemList);
             dungeon = new Dungeon();
             isGameOver = false;
-        }
-
-        public void GameStart()
-        {
-            if (File.Exists(savePath))  //세이브 파일이 존재할 경우
-            {
-                Console.Clear();
-                Console.WriteLine("세이브 파일이 존재합니다. 이어서 게임을 시작합니다.");
-                Utils.Pause(false);
-                LoadData();
-            }
-            else    //세이브 파일이 존재하지 않을 경우
-            {
-                Console.Clear();
-                Console.WriteLine("세이브 파일이 없습니다. 새로운 게임을 시작합니다..");
-                Utils.Pause(false);
-                NewGameSetting();
-
-            }
-
-            while (!isGameOver)
-            {
-                TownAction();
-            }
         }
 
         void SaveData()     //게임 저장
@@ -174,16 +116,15 @@ namespace SpartaDungeon
                         instance = new Equipment(info);
                         break;
                     case ItemType.Usable:       //소비 아이템
-                        instance = new Equipment(info);
+                        instance = new Usable(info);
                         break;
                     case ItemType.Other:        //기타 아이템
-                        instance = new Equipment(info);
+                        instance = new OtherItem(info);
                         break;
                     default:
-                        instance = new Equipment(info);
+                        instance = new OtherItem(info);
                         break;
                 }
-
                 itemList.Add(instance);
                 if (!instance.IsForSale)    //플레이어의 소유인 경우
                 {
@@ -194,6 +135,7 @@ namespace SpartaDungeon
             }
             player = new Player(config.PlayerData, inventory);
             player.RestoreAfterLoad();
+            player.UpdatePlayerStats();
             shop = new Shop(player, itemList);
             dungeon = new Dungeon();
             isGameOver = false;
@@ -210,9 +152,9 @@ namespace SpartaDungeon
             Console.WriteLine("4. 던전 입장");
             Console.WriteLine("5. 휴식하기");
             Console.WriteLine("6. 게임 종료\n");
+            Console.Write("\n원하시는 행동을 입력해주세요.");
 
-
-            switch (Utils.GetPlayerInput(true))
+            switch (Utils.GetPlayerInput())
             {
                 case 1:     //상태창 표시
                     player.ShowPlayerInfo();
@@ -227,7 +169,7 @@ namespace SpartaDungeon
                     shop.ShowShop();
                     break;
                 case 4:     //던전 입장
-                    DungeonAction();
+                    dungeon.DungeonAction(player);
                     break;
                 case 5:     //휴식하기
                     RestAction();
@@ -239,114 +181,6 @@ namespace SpartaDungeon
                     Console.WriteLine("잘못된 입력입니다.");
                     Utils.Pause(false);
                     break;
-            }
-        }
-
-        void DungeonAction()    // 4: 던전 입장 액션
-        {
-            bool exit = false;
-            while (!exit)
-            {
-                int health = player.CurrentHP;
-                int gold = player.Gold;
-                Console.Clear();
-                Console.WriteLine("<던전 입장>");
-                Console.WriteLine("도전할 던전의 난이도를 선택하세요.");
-                Console.WriteLine($"\n1. 쉬운 던전     | 방어력 {dungeon.DefenseLevel[0]} 이상 권장");
-                Console.WriteLine($"2. 보통 던전     | 방어력 {dungeon.DefenseLevel[1]} 이상 권장");
-                Console.WriteLine($"3. 어려운 던전   | 방어력 {dungeon.DefenseLevel[2]} 이상 권장");
-                Console.WriteLine("0. 나가기");
-
-                switch (Utils.GetPlayerInput(true))
-                {
-                    case 0:
-                        exit = true;
-                        break;
-                    case 1:
-                        if (dungeon.EnterDungeon(player, 1))
-                        {   //던전 성공 시
-                            Console.Clear();
-                            Console.WriteLine("<던전 클리어>");
-                            Console.WriteLine("축하합니다!");
-                            Console.WriteLine("쉬운 던전을 클리어 하셨습니다.");
-                            Console.WriteLine("\n[탐험 결과]");
-                            Console.WriteLine($"체력 {health} -> {player.CurrentHP}");
-                            Console.WriteLine($"Gold {gold} -> {player.Gold}");
-                            Utils.Pause(true);
-                            player.GetEXP(1);   //쉬움 던전 : 경험치 1 획득
-                        }
-                        else    //던전 실패 시
-                        {
-                            Console.Clear();
-                            Console.WriteLine("<던전 실패>");
-                            Console.WriteLine("던전에서 패배했습니다...");
-                            Console.WriteLine("방어구 레벨을 올리고 다시 시도해보세요.");
-                            Console.WriteLine("\n[탐험 결과]");
-                            Console.WriteLine($"체력 {health} -> {player.CurrentHP}");
-                            Utils.Pause(true);
-                        }
-                        exit = true;
-                        break;
-                    case 2:
-                        if (dungeon.EnterDungeon(player, 2))
-                        {   //던전 성공 시
-                            Console.Clear();
-                            Console.WriteLine("<던전 클리어>");
-                            Console.WriteLine("축하합니다!");
-                            Console.WriteLine("보통 던전을 클리어 하셨습니다.");
-                            Console.WriteLine("\n[탐험 결과]");
-                            Console.WriteLine($"체력 {health} -> {player.CurrentHP}");
-                            Console.WriteLine($"Gold {gold} -> {player.Gold}");
-                            Utils.Pause(true);
-                            player.GetEXP(2);   //쉬움 던전 : 경험치 2 획득
-                        }
-                        else    //던전 실패 시
-                        {
-                            Console.Clear();
-                            Console.WriteLine("<던전 실패>");
-                            Console.WriteLine("던전에서 패배했습니다...");
-                            Console.WriteLine("방어구 레벨을 올리고 다시 시도해보세요.");
-                            Console.WriteLine("\n[탐험 결과]");
-                            Console.WriteLine($"체력 {health} -> {player.CurrentHP}");
-                            Utils.Pause(true);
-                        }
-                        exit = true;
-                        break;
-                    case 3:
-                        if (dungeon.EnterDungeon(player, 3))
-                        {   //던전 성공 시
-                            Console.Clear();
-                            Console.WriteLine("<던전 클리어>");
-                            Console.WriteLine("축하합니다!");
-                            Console.WriteLine("어려운 던전을 클리어 하셨습니다.");
-                            Console.WriteLine("\n[탐험 결과]");
-                            Console.WriteLine($"체력 {health} -> {player.CurrentHP}");
-                            Console.WriteLine($"Gold {gold} -> {player.Gold}");
-                            Utils.Pause(true);
-                            player.GetEXP(3);   //쉬움 던전 : 경험치 3 획득
-                        }
-                        else    //던전 실패 시
-                        {
-                            Console.Clear();
-                            Console.WriteLine("<던전 실패>");
-                            Console.WriteLine("던전에서 패배했습니다...");
-                            Console.WriteLine("방어구 레벨을 올리고 다시 시도해보세요.");
-                            Console.WriteLine("\n[탐험 결과]");
-                            Console.WriteLine($"체력 {health} -> {player.CurrentHP}");
-                            Utils.Pause(true);
-                        }
-                        exit = true;
-                        break;
-                    default:
-                        Console.WriteLine("잘못된 입력입니다.");
-                        Utils.Pause(false);
-                        break;
-                }
-            }
-            if (player.CurrentHP <= 0)
-            {
-                isGameOver = true;
-                GameOver();
             }
         }
 
@@ -362,8 +196,9 @@ namespace SpartaDungeon
                     $" (보유 골드 : {player.Gold} G)");
                 Console.WriteLine("\n1. 휴식하기");
                 Console.WriteLine("0. 나가기");
+                Console.Write("\n원하시는 행동을 입력해주세요.");
 
-                switch (Utils.GetPlayerInput(true))
+                switch (Utils.GetPlayerInput())
                 {
                     case 0:
                         exit = true;
@@ -392,8 +227,7 @@ namespace SpartaDungeon
 
         void ExitGame()     // 6: 게임 종료 액션
         {
-            bool exit = false;
-            while (!exit)
+            while (true)
             {
                 Console.Clear();
                 Console.WriteLine("게임을 종료하시겠습니까?");
@@ -401,17 +235,16 @@ namespace SpartaDungeon
                 Console.WriteLine("\n1. 계속하기");
                 Console.WriteLine("2. 게임 종료");
 
-                switch (Utils.GetPlayerInput(true))
+                Console.Write("\n원하시는 행동을 입력해주세요.");
+                switch (Utils.GetPlayerInput())
                 {
                     case 1:
-                        exit = true;
-                        break;
+                        return;
                     case 2:
                         Console.WriteLine("\n게임을 종료합니다.");
                         SaveData();
                         isGameOver = true;
-                        exit = true;
-                        break;
+                        return;
                     default:
                         Console.WriteLine("잘못된 입력입니다.");
                         Utils.Pause(false);
@@ -421,29 +254,125 @@ namespace SpartaDungeon
         }
         void GameOver()     //플레이어 사망 시 호출
         {
-            bool exit = false;
-            while (!exit)
+            while (true)
             {
                 Console.Clear();
                 Console.WriteLine("You Died");
                 Console.WriteLine("\n1. 다시 시작하기");
                 Console.WriteLine("\n2. 게임 종료");
-                switch (Utils.GetPlayerInput(true))
+                Console.Write("\n원하시는 행동을 입력해주세요.");
+
+                switch (Utils.GetPlayerInput())
                 {
                     case 1:
-                        exit = true;
-                        GameStart();
-                        break;
+                        NewGameSetting();
+                        return;
                     case 2:
-                        exit = true;
-                        break;
+                        Console.WriteLine("\n게임을 종료합니다.");
+                        isGameOver = true;
+                        return;
                     default:
+                        Console.WriteLine("잘못된 입력입니다.");
+                        Utils.Pause(false);
                         break;
                 }
             }
-
-
         }
 
+        string GetNameFromPlayer()  //이름 입력
+        {
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("스파르타 던전에 오신 걸 환영합니다!");
+                Console.WriteLine("플레이어 이름을 입력해주세요.\n");
+                string input = Console.ReadLine();
+
+                // 입력이 null이거나 공백인 경우
+                if (string.IsNullOrWhiteSpace(input))
+                {
+                    Console.WriteLine("이름은 비워둘 수 없습니다. 다시 입력해주세요.");
+                    Utils.Pause(false);
+                    continue;
+                }
+
+                // 너무 짧거나 긴 이름인 경우
+                if (input.Length < 2 || input.Length > 12)
+                {
+                    Console.WriteLine("이름은 2자 이상 12자 이하여야 합니다.");
+                    Utils.Pause(false);
+                    continue;
+                }
+
+                while (true)
+                {
+                    Console.Clear();
+                    Console.WriteLine($"입력하신 이름은 {input} 입니다.");
+                    Console.WriteLine("\n1. 확인");
+                    Console.WriteLine("2. 취소");
+
+
+                    switch (Utils.GetPlayerInput())
+                    {
+                        case 1:
+                            return input;
+                        case 2:
+                            break;
+                        default:
+                            Console.WriteLine("잘못된 입력입니다.");
+                            Utils.Pause(false);
+                            continue;
+                    }
+                    break;
+                }
+            }
+        }
+
+        Job GetJobFromPlayer()    //직업 입력
+        {
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("직업을 선택하세요.\n");
+                foreach (Job job in Enum.GetValues(typeof(Job)))
+                {
+                    Console.WriteLine($"{(int)job + 1}. {Utils.JobDisplayNames[job]}");
+                }
+
+                Console.WriteLine();
+                int input = Utils.GetPlayerInput();
+
+                if (input >= 1 && input <= 3)   //입력이 1, 2, 3
+                {
+                    Job selectedJob = (Job)(input - 1);
+                    while (true)
+                    {
+                        Console.Clear();
+                        Console.WriteLine($"{Utils.JobDisplayNames[selectedJob]}을 선택하시겠습니까?");
+                        Console.WriteLine("\n1. 확인");
+                        Console.WriteLine("2. 취소");
+
+                        switch (Utils.GetPlayerInput())
+                        {
+                            case 1:
+                                return selectedJob;
+                            case 2:
+                                break;
+                            default:
+                                Console.WriteLine("잘못된 입력입니다.");
+                                Utils.Pause(false);
+                                continue;
+                        }
+                        break;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("잘못된 입력입니다.");
+                    Utils.Pause(false);
+                }
+
+            }
+        }
     }
 }

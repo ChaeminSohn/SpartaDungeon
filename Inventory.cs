@@ -42,15 +42,19 @@ namespace SpartaDungeon
             switch (item.ItemType)   //아이템 분류 과정
             {
                 case ItemType.Equipment:
-
-                    equipments.Add((Equipment)item);
+                    Equipment equip = (Equipment)item;
+                    equipments.Add(equip);
+                    if (equip.IsEquipped)   //장착된 아이템인 경우
+                    {
+                        equippedItems[(int)equip.EquipType] = equip;
+                    }
                     break;
                 default:
                     break;
             }
         }
 
-        public void RemoveItem(ITradable item)
+        public void RemoveItem(ITradable item)  //인벤토리에서 아이템 제거
         {
             items.Remove(item);
             switch (item.ItemType)   //아이템 분류 과정
@@ -62,7 +66,7 @@ namespace SpartaDungeon
                     break;
             }
         }
-        public void ShowItems()
+        public void ShowItems()     //인벤토리 창
         {
             bool exit = false;
             while (!exit)
@@ -74,13 +78,13 @@ namespace SpartaDungeon
                 foreach (ITradable item in items)
                 {
                     Console.Write("- ");
-                    item.ShowInfoInventory();
+                    item.ShowInfo(false);
                 }
                 Console.WriteLine("\n1. 장착 관리");
                 Console.WriteLine("0. 나가기");
+                Console.Write("\n원하시는 행동을 입력해주세요.");
 
-
-                switch (Utils.GetPlayerInput(true))
+                switch (Utils.GetPlayerInput())
                 {
                     case 1:
                         ControlEquipments();
@@ -96,7 +100,7 @@ namespace SpartaDungeon
             }
         }
 
-        public void ControlEquipments()
+        public void ControlEquipments()     //장비 아이템 장착 관리
         {
             bool exit = false;
             while (!exit)
@@ -108,22 +112,22 @@ namespace SpartaDungeon
                 Console.WriteLine("\n[아이템 목록]");
                 for (int i = 0; i < equipments.Count; i++)
                 {
-                    if (equipments[i].isEquipped)
+                    if (equipments[i].IsEquipped)
                     {
                         Console.Write($"- {i + 1} [E]");
-                        equipments[i].ShowInfoInventory();
+                        equipments[i].ShowInfo(false);
                     }
                     else
                     {
-                        Console.Write($"- {i + 1}   ");
-                        equipments[i].ShowInfoInventory();
+                        Console.Write($"- {i + 1}    ");
+                        equipments[i].ShowInfo(false);
                     }
                 }
 
                 Console.WriteLine("\n0. 나가기");
                 Console.Write("\n장착/해제할 아이템 번호를 입력하세요. ");
 
-                int playerInput = Utils.GetPlayerInput(false);
+                int playerInput = Utils.GetPlayerInput();
 
                 if (playerInput == 0) //인풋 0 : 나가기
                 {
@@ -139,7 +143,7 @@ namespace SpartaDungeon
                     Equipment selected = equipments[playerInput - 1];
                     int equipIndex = (int)selected.EquipType;
 
-                    if (selected.isEquipped)    //이미 장착된 경우
+                    if (selected.IsEquipped)    //이미 장착된 경우
                     {
                         selected.UnEquip();     //장착 해제
                         equippedItems[equipIndex] = null;

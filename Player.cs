@@ -13,7 +13,14 @@ namespace SpartaDungeon
         Mage,
         Archer
     }
-    internal class Player : IBattleUnit
+
+    public enum Stat  //스탯 종류
+    {
+        Health,     //체력
+        Attack,     //공격력
+        Defense,    //방어력
+    }
+    internal class Player
     {
         public string Name { get; private set; }    //이름
         public int Level { get; private set; }  //레벨
@@ -33,6 +40,7 @@ namespace SpartaDungeon
         public Job Job { get; private set; }    //직업
         public int Gold { get; private set; }   //골드
         public Inventory Inventory { get; private set; }    //인벤토리
+        public event Action? OnPlayerDie; //플레이어 사망 이벤트
 
         public Player(string name, Job job, Inventory inventory)    //새 게임 생성자
         {
@@ -105,7 +113,7 @@ namespace SpartaDungeon
             if (CurrentHP <= 0)
             {
                 CurrentHP = 0;
-                OnDie();
+                OnPlayerDie?.Invoke();
             }
         }
 

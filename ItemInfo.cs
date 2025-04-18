@@ -17,12 +17,12 @@ namespace SpartaDungeon
         public bool IsForSale { get; set; }  //판매 여부
 
         //장비 전용 필드
-        public EquipType EquipType { get; set; }
-        public Stat? Stat { get; set; }
-        public int? StatValue { get; set; }
-        public bool IsEquipped { get; set; } //플레이어 착용 여부
+        public EquipType EquipType { get; set; } = default;
+        public Stat Stat { get; set; } = default;
+        public int StatValue { get; set; } = -1;
+        public bool IsEquipped { get; set; } = false; //플레이어 착용 여부
 
-        //장비 전용 생성자
+        //장비 아이템 생성자
         public ItemInfo(string name, ItemType itemType, EquipType equipType, Stat stat, int statValue, string description, int price,
             bool isForSale, bool isEquipped)
         {
@@ -36,5 +36,16 @@ namespace SpartaDungeon
             IsForSale = isForSale;
             IsEquipped = isEquipped;
         }
+
+        //소비 아이템 생성자
+        public ItemInfo(string name, ItemType itemType, string description, int price, bool isForSale)
+        {
+            Name = name;
+            Description = description;
+            Price = price;
+            ItemType = itemType;
+            IsForSale = isForSale;
+        }
+
     }
 }

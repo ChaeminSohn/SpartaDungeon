@@ -39,14 +39,14 @@ namespace SpartaDungeon
                 foreach (ITradable item in sellingItems)
                 {
                     Console.Write("- ");
-                    item.ShowInfoShop();
+                    item.ShowInfo(true);
                 }
                 //플레이어 입력 받기
                 Console.WriteLine("\n1. 아이템 구매");
                 Console.WriteLine("2. 아이템 판매");
                 Console.WriteLine("0. 나가기");
-
-                switch (Utils.GetPlayerInput(true))
+                Console.Write("\n원하시는 행동을 입력해주세요.");
+                switch (Utils.GetPlayerInput())
                 {
                     case 0:
                         exit = true;
@@ -83,10 +83,11 @@ namespace SpartaDungeon
                 foreach (ITradable item in sellingItems)
                 {
                     Console.Write($"- {index++}. ");
-                    item.ShowInfoShop();
+                    item.ShowInfo(true);
                 }
                 Console.WriteLine("\n0. 나가기");
-                int playerInput = Utils.GetPlayerInput(true);
+                Console.WriteLine("\n구매할 아이템 번호를 입력하세요. ");
+                int playerInput = Utils.GetPlayerInput();
 
                 if (playerInput > sellingItems.Count || playerInput == -1)
                 {   //인풋이 아이템 개수보다 크거나 완전 잘못된 값일 때
@@ -100,7 +101,7 @@ namespace SpartaDungeon
                     exit = true;
                     break;
                 }
-                else
+                else    //올바른 아이템 번호 입력
                 {
                     ITradable selectedItem = sellingItems[playerInput - 1];   //선택된 아이템
                     if (!selectedItem.IsForSale)  //이미 판매된 아이템인 경우
@@ -112,10 +113,12 @@ namespace SpartaDungeon
                     else if (player.Gold >= selectedItem.Price)
                     {
                         //구매 확정 단계
-                        Console.WriteLine($"\n아이템 가격 : {selectedItem.Price} G , 보유 골드 : {player.Gold} G");
+                        Console.WriteLine($"\n{selectedItem.Name}");
+                        Console.WriteLine($"아이템 가격 : {selectedItem.Price} G , 보유 골드 : {player.Gold} G");
                         Console.WriteLine("1. 구매");
                         Console.WriteLine("2. 다시 생각해본다");
-                        switch (Utils.GetPlayerInput(true))
+                        Console.Write("\n원하시는 행동을 입력해주세요.");
+                        switch (Utils.GetPlayerInput())
                         {
                             case 1:
                                 player.BuyItem(selectedItem);
@@ -162,10 +165,11 @@ namespace SpartaDungeon
                 foreach (ITradable item in items)
                 {
                     Console.Write($"- {index++}. ");
-                    item.ShowInfoShop();
+                    item.ShowInfo(false);
                 }
                 Console.WriteLine("\n0. 나가기");
-                int playerInput = Utils.GetPlayerInput(true);
+                Console.WriteLine("\n판매할 아이템 번호를 입력하세요. ");
+                int playerInput = Utils.GetPlayerInput();
 
                 if (playerInput > items.Count || playerInput == -1)
                 {   //인풋이 아이템 개수보다 크거나 완전 잘못된 값일 때
@@ -186,7 +190,8 @@ namespace SpartaDungeon
                     Console.WriteLine($"\n{selectedItem.Name} : {sellPrice} G");
                     Console.WriteLine("1. 판매");
                     Console.WriteLine("2. 다시 생각해본다");
-                    switch (Utils.GetPlayerInput(true))
+                    Console.Write("\n원하시는 행동을 입력해주세요.");
+                    switch (Utils.GetPlayerInput())
                     {
                         case 1:
                             player.SellItem(selectedItem, sellPrice);
