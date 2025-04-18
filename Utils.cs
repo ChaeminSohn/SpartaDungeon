@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SpartaDungeon
 {
-    internal static class Utils
+    internal static class Utils //다양한 곳에서 자주 쓰이는 기능을 모아놓은 클래스
     {
         // 실제 출력 너비 기준으로 문자열 오른쪽 패딩
         public static string PadToWidth(string str, int totalWidth)

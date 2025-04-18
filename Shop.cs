@@ -35,7 +35,7 @@ namespace SpartaDungeon
             }
         }
 
-        public void ShowShop()
+        public void ShowShop() // 3: 상점 창
         {
             while (true)
             {

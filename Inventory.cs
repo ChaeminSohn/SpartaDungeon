@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace SpartaDungeon
 {
+    //플레이어의 인벤토리를 구현하는 클래스
+    //플레이어가 소유한 모든 아이템 관리
+    //장비 아이템들의 장착 관리
     internal class Inventory
     {
         int inventorySpace = 8;
@@ -69,7 +72,9 @@ namespace SpartaDungeon
                     break;
             }
         }
-        public void ShowItems()     //인벤토리 창 - 모든 아이템 표시
+
+        //장비, 소비, 기타 아이템을 따로 표기하는 기능은 아직 구현 안됨
+        public void ShowItems()     // 2: 인벤토리 창 - 모든 아이템 표시
         {
             while (true)
             {

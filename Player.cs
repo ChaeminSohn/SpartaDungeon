@@ -48,7 +48,7 @@ namespace SpartaDungeon
             Job = job;
             Level = 1;
             Experience = 0;
-            this.Inventory = inventory;
+            Inventory = inventory;
             LoadDefaultData();
             inventory.OnEquipChanged += UpdatePlayerStats;
         }
