@@ -46,6 +46,7 @@ namespace SpartaDungeon
         }
         void NewGameSetting()   //새로운 게임 설정
         {
+            itemList = new List<ITradable>();
             //아이템 데이터 불러오기
             if (!ConfigLoader.TryLoad<ItemConfig>("items_config.json", out var config))
             {
@@ -100,6 +101,7 @@ namespace SpartaDungeon
 
         void LoadData()     //게임 불러오기
         {
+            itemList = new List<ITradable>();
             if (!ConfigLoader.TryLoad<GameSaveData>(savePath, out var config))
             {
                 Console.WriteLine("저장 데이터 불러오기 실패");
@@ -134,6 +136,7 @@ namespace SpartaDungeon
 
             }
             player = new Player(config.PlayerData, inventory);
+            player.OnPlayerDie += GameOver;
             player.RestoreAfterLoad();
             player.UpdatePlayerStats();
             shop = new Shop(player, itemList);
@@ -186,8 +189,7 @@ namespace SpartaDungeon
 
         void RestAction()   //5: 휴식 액션
         {
-            bool exit = false;
-            while (!exit)
+            while (true)
             {
                 int health = player.CurrentHP;
                 Console.Clear();
@@ -201,8 +203,7 @@ namespace SpartaDungeon
                 switch (Utils.GetPlayerInput())
                 {
                     case 0:
-                        exit = true;
-                        break;
+                        return;
                     case 1:
                         if (player.Gold >= 500)
                         {
@@ -217,9 +218,10 @@ namespace SpartaDungeon
                             Console.WriteLine("\n골드가 부족합니다.");
                             Utils.Pause(false);
                         }
-                        exit = true;
-                        break;
+                        return;
                     default:
+                        Console.WriteLine("잘못된 입력입니다.");
+                        Utils.Pause(false);
                         break;
                 }
             }
@@ -254,6 +256,7 @@ namespace SpartaDungeon
         }
         void GameOver()     //플레이어 사망 시 호출
         {
+            File.Delete(savePath);  //저장 데이터 삭제
             while (true)
             {
                 Console.Clear();

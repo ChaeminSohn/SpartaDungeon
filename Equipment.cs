@@ -18,11 +18,11 @@ namespace SpartaDungeon
         public string Description => itemInfo.Description;
         public int Price => itemInfo.Price;
         public ItemType ItemType => itemInfo.ItemType;
-        public EquipType EquipType => itemInfo.EquipType; //장비 종류
-        public Stat Stat => itemInfo.Stat; //스탯 종류(공격력, 방어력, ....)
-        public int StatValue => itemInfo.StatValue;  //장비 스탯 계수
-        public bool IsEquipped { get; private set; } //플레이어 착용 여부
-        public bool IsForSale { get; private set; }   //판매 여부
+        public EquipType EquipType => itemInfo.EquipType;
+        public Stat Stat => itemInfo.Stat;
+        public int StatValue => itemInfo.StatValue;
+        public bool IsEquipped { get; private set; }
+        public bool IsForSale { get; private set; }
 
         public Equipment(ItemInfo itemInfo)
         {

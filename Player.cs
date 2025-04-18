@@ -116,12 +116,6 @@ namespace SpartaDungeon
                 OnPlayerDie?.Invoke();
             }
         }
-
-        public void OnDie()
-        {
-
-        }
-
         public void RecoverHP(int hp)
         {
             CurrentHP += hp;
@@ -135,7 +129,7 @@ namespace SpartaDungeon
             BonusFullHP = 0;
             BonusAttack = 0;
             BonusDefense = 0;
-            foreach (Equipment item in Inventory.equippedItems)
+            foreach (Equipment item in Inventory.EquippedItems)
             {
                 if (item != null)
                 {

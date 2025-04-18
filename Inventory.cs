@@ -10,25 +10,28 @@ namespace SpartaDungeon
     internal class Inventory
     {
         int inventorySpace = 8;
-        public List<ITradable> items { get; private set; } //보유중인 아이템
-        public List<Equipment> equipments { get; private set; } //장비 아이템
-        public Equipment[] equippedItems { get; private set; } //플레이어가 장비중인 아이템
+        public List<ITradable> Items { get; private set; } //보유중인 모든 아이템
+        public List<ITradable> Equipments { get; private set; } = new List<ITradable>(); //장비 아이템
+        public List<ITradable> Usables { get; private set; } = new List<ITradable>(); //소비 아이템
+        public List<ITradable> Others { get; private set; } = new List<ITradable>(); //기타 아이템
+        public Equipment[] EquippedItems { get; private set; } //플레이어가 장비중인 아이템
         public event Action? OnEquipChanged;    //플레이어 장비 변환 이벤트
         public Inventory()
         {
-            items = new List<ITradable>(inventorySpace);
-            equipments = new List<Equipment>();
-            equippedItems = new Equipment[2];   //0 : 무기 1 :방어구
-            foreach (ITradable item in items)
+            Items = new List<ITradable>(inventorySpace);
+            EquippedItems = new Equipment[2];   //0 : 무기 1 :방어구
+            foreach (ITradable item in Items)
             {
                 switch (item.ItemType)
                 {
                     case ItemType.Equipment:  //장비 아이템
-                        equipments.Add((Equipment)item);
+                        Equipments.Add((Equipment)item);
                         break;
                     case ItemType.Usable:  //소비 아이템   
+                        Usables.Add((Usable)item);
                         break;
                     case ItemType.Other:  //기타 아이템  
+                        Usables.Add((OtherItem)item);
                         break;
                     default:
                         break;
@@ -38,15 +41,15 @@ namespace SpartaDungeon
 
         public void AddItem(ITradable item)  //인벤토리에 아이템 추가
         {
-            items.Add(item);
+            Items.Add(item);
             switch (item.ItemType)   //아이템 분류 과정
             {
                 case ItemType.Equipment:
                     Equipment equip = (Equipment)item;
-                    equipments.Add(equip);
+                    Equipments.Add(equip);
                     if (equip.IsEquipped)   //장착된 아이템인 경우
                     {
-                        equippedItems[(int)equip.EquipType] = equip;
+                        EquippedItems[(int)equip.EquipType] = equip;
                     }
                     break;
                 default:
@@ -56,26 +59,25 @@ namespace SpartaDungeon
 
         public void RemoveItem(ITradable item)  //인벤토리에서 아이템 제거
         {
-            items.Remove(item);
+            Items.Remove(item);
             switch (item.ItemType)   //아이템 분류 과정
             {
                 case ItemType.Equipment:
-                    equipments.Remove((Equipment)item);
+                    Equipments.Remove((Equipment)item);
                     break;
                 default:
                     break;
             }
         }
-        public void ShowItems()     //인벤토리 창
+        public void ShowItems()     //인벤토리 창 - 모든 아이템 표시
         {
-            bool exit = false;
-            while (!exit)
+            while (true)
             {
                 Console.Clear();
                 Console.WriteLine("<인벤토리>");
                 Console.WriteLine("보유 중인 아이템을 관리할 수 있습니다.");
                 Console.WriteLine("\n[아이템 목록]");
-                foreach (ITradable item in items)
+                foreach (ITradable item in Items)
                 {
                     Console.Write("- ");
                     item.ShowInfo(false);
@@ -90,8 +92,7 @@ namespace SpartaDungeon
                         ControlEquipments();
                         break;
                     case 0:
-                        exit = true;
-                        break;
+                        return;
                     default:
                         Console.WriteLine("잘못된 입력입니다.");
                         Utils.Pause(false);
@@ -102,25 +103,24 @@ namespace SpartaDungeon
 
         public void ControlEquipments()     //장비 아이템 장착 관리
         {
-            bool exit = false;
-            while (!exit)
+            while (true)
             {
                 Console.Clear();
-                Console.Write("인벤토리 - 장착 관리");
+                Console.WriteLine("인벤토리 - 장착 관리");
                 Console.WriteLine("보유 중인 아이템을 관리할 수 있습니다.");
 
                 Console.WriteLine("\n[아이템 목록]");
-                for (int i = 0; i < equipments.Count; i++)
+                for (int i = 0; i < Equipments.Count; i++)
                 {
-                    if (equipments[i].IsEquipped)
+                    if (((Equipment)Equipments[i]).IsEquipped)
                     {
                         Console.Write($"- {i + 1} [E]");
-                        equipments[i].ShowInfo(false);
+                        Equipments[i].ShowInfo(false);
                     }
                     else
                     {
                         Console.Write($"- {i + 1}    ");
-                        equipments[i].ShowInfo(false);
+                        Equipments[i].ShowInfo(false);
                     }
                 }
 
@@ -131,44 +131,37 @@ namespace SpartaDungeon
 
                 if (playerInput == 0) //인풋 0 : 나가기
                 {
-                    exit = true;
+                    return;
                 }
-                else if (playerInput > equipments.Count || playerInput == -1)
+                else if (playerInput > Equipments.Count || playerInput == -1)
                 {   //인풋이 아이템 개수보다 크거나 완전 잘못된 값일 때
                     Console.WriteLine("\n잘못된 입력입니다.");
                     Utils.Pause(false);
                 }
                 else
                 {
-                    Equipment selected = equipments[playerInput - 1];
+                    Equipment selected = (Equipment)Equipments[playerInput - 1];
                     int equipIndex = (int)selected.EquipType;
 
                     if (selected.IsEquipped)    //이미 장착된 경우
                     {
                         selected.UnEquip();     //장착 해제
-                        equippedItems[equipIndex] = null;
+                        EquippedItems[equipIndex] = null;
                     }
                     else
                     {
                         //같은 종류 장비가 이미 장착되어 있으면 해제
-                        if (equippedItems[equipIndex] != null)
+                        if (EquippedItems[equipIndex] != null)
                         {
-                            equippedItems[equipIndex].UnEquip();
+                            EquippedItems[equipIndex].UnEquip();
                         }
 
                         selected.Equip();
-                        equippedItems[equipIndex] = selected;
+                        EquippedItems[equipIndex] = selected;
                     }
                     OnEquipChanged?.Invoke();
                 }
             }
-
         }
-
-        public void ShowEquipedItems()  //현재 장비중인 아이템 목록을 보여줌
-        {
-
-        }
-
     }
 }

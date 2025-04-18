@@ -14,7 +14,7 @@ namespace SpartaDungeon
         public int[] ExpAward { get; private set; } = { 1, 2, 3 };
         private static Random rand = new Random();
 
-        public void DungeonAction(Player player)
+        public void DungeonAction(Player player)    // 4 : 던전 입장 액션
         {
             while (true)
             {
