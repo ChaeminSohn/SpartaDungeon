@@ -26,8 +26,8 @@ namespace SpartaDungeon
             {
                 Console.Clear();
                 Console.WriteLine("세이브 파일이 존재합니다. 이어서 게임을 시작합니다.");
-                Utils.Pause(true);
                 LoadData();
+                Utils.Pause(true);
             }
             else    //세이브 파일이 존재하지 않을 경우
             {
@@ -35,7 +35,6 @@ namespace SpartaDungeon
                 Console.WriteLine("세이브 파일이 없습니다. 새로운 게임을 시작합니다..");
                 Utils.Pause(true);
                 NewGameSetting();
-
             }
             while (!isGameOver)     //게임이 종료될 때 까지 반복
             {
