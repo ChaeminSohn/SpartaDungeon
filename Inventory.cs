@@ -122,13 +122,12 @@ namespace SpartaDungeon
                     if (((Equipment)Equipments[i]).IsEquipped)
                     {
                         Console.Write($"- {i + 1} [E]");
-                        Equipments[i].ShowInfo(false);
                     }
                     else
                     {
                         Console.Write($"- {i + 1}    ");
-                        Equipments[i].ShowInfo(false);
                     }
+                    Equipments[i].ShowInfo(false);
                 }
 
                 Console.WriteLine("\n0. 나가기");
@@ -148,7 +147,7 @@ namespace SpartaDungeon
                 else
                 {
                     Equipment selected = (Equipment)Equipments[playerInput - 1];
-                    int equipIndex = (int)selected.EquipType;
+                    int equipIndex = (int)selected.EquipType;   //무기 : 0, 방어구 : 1
 
                     if (selected.IsEquipped)    //이미 장착된 경우
                     {

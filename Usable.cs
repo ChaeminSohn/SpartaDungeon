@@ -18,6 +18,7 @@ namespace SpartaDungeon
         public Usable(ItemInfo itemInfo)
         {
             this.itemInfo = itemInfo;
+            IsForSale = itemInfo.IsForSale;
         }
         public ItemInfo GetItemInfo()
         {

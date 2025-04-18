@@ -9,20 +9,21 @@ namespace SpartaDungeon
     internal class OtherItem : ITradable    //기타 아이템
     {
         private ItemInfo itemInfo;
-        public string Name => throw new NotImplementedException();
+        public string Name => itemInfo.Name;
 
-        public string Description => throw new NotImplementedException();
+        public string Description => itemInfo.Description;
 
-        public int Price => throw new NotImplementedException();
+        public int Price => itemInfo.Price;
 
         public ItemType ItemType => ItemType.Other;
 
-        public bool IsForSale => throw new NotImplementedException();
+        public bool IsForSale { get; private set; }
 
 
         public OtherItem(ItemInfo itemInfo)
         {
             this.itemInfo = itemInfo;
+            IsForSale = itemInfo.IsForSale;
         }
         public ItemInfo GetItemInfo()
         {
