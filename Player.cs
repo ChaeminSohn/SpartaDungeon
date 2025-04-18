@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace SpartaDungeon
 {
-
     public enum Job    //직업 종류
     {
         Warrior,

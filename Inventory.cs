@@ -25,7 +25,7 @@ namespace SpartaDungeon
             EquippedItems = new Equipment[2];   //0 : 무기 1 :방어구
             foreach (ITradable item in Items)
             {
-                switch (item.ItemType)
+                /*switch (item.ItemType)
                 {
                     case ItemType.Equipment:  //장비 아이템
                         Equipments.Add((Equipment)item);
@@ -38,7 +38,7 @@ namespace SpartaDungeon
                         break;
                     default:
                         break;
-                }
+                }*/
             }
         }
 
@@ -66,7 +66,9 @@ namespace SpartaDungeon
             switch (item.ItemType)   //아이템 분류 과정
             {
                 case ItemType.Equipment:
-                    Equipments.Remove((Equipment)item);
+                    Equipments.Remove(item);
+                    EquippedItems[(int)EquipType.Armor] = null;
+                    OnEquipChanged?.Invoke();
                     break;
                 default:
                     break;
